@@ -7,7 +7,7 @@ use swayipc_async::{Connection, EventType, WindowEvent};
 #[derive(Debug)]
 enum SwayKbddError {
     LoggerError(SetLoggerError),
-    SwayIpcError(swayipc_async::Error),
+    SwayIpcError(),
 }
 
 impl From<SetLoggerError> for SwayKbddError {
@@ -17,8 +17,8 @@ impl From<SetLoggerError> for SwayKbddError {
 }
 
 impl From<swayipc_async::Error> for SwayKbddError {
-    fn from(value: swayipc_async::Error) -> Self {
-        SwayKbddError::SwayIpcError(value)
+    fn from(_value: swayipc_async::Error) -> Self {
+        SwayKbddError::SwayIpcError()
     }
 }
 
@@ -27,7 +27,7 @@ fn main() -> Result<(), SwayKbddError> {
 
     block_on(async {
         let connection = Connection::new().await?;
-        let mut connection2 = Connection::new().await?;
+        let mut keyboard_setup_connection = Connection::new().await?;
 
         let mut pid_hashmap = HashMap::new();
         let mut last_w_pid = None;
@@ -40,7 +40,7 @@ fn main() -> Result<(), SwayKbddError> {
                 Ok(event) => match event {
                     swayipc_async::Event::Window(w) => {
                         process_window_event(
-                            &mut connection2,
+                            &mut keyboard_setup_connection,
                             w,
                             &mut pid_hashmap,
                             &mut last_w_pid,
@@ -51,7 +51,7 @@ fn main() -> Result<(), SwayKbddError> {
                         // Need to save keyboard layout here
                         if let Some(keyboard_index) = input.input.xkb_active_layout_index {
                             if let Some(w_pid) = last_w_pid {
-                                info!("Current keyboard layout set: {}", keyboard_index);
+                                info!("Current keyboard layout set to index {} for pid {}", &keyboard_index, &w_pid);
                                 pid_hashmap.insert(w_pid, keyboard_index);
                             }
                         }
@@ -79,15 +79,16 @@ async fn process_window_event(
         match w.change {
             swayipc_async::WindowChange::New => {
                 info!(
-                    "New window found: {}",
-                    w.container.name.unwrap_or_else(|| "null".to_owned())
+                    "New window found {} with pid {}",
+                    w.container.name.unwrap_or_else(|| "null".to_owned()),
+                    &w_pid
                 );
-                pid_hashmap.insert(w_pid, 0);
+                pid_hashmap.entry(w_pid).or_insert(0);
                 *last_w_pid = Some(w_pid);
             }
             swayipc_async::WindowChange::Focus => {
                 let window_name = w.container.name.unwrap_or_else(|| "null".to_owned());
-                info!("Window focused: {}", &window_name);
+                info!("Window focused {} with pid {}", &window_name, &w_pid);
                 if let Some(saved_keyboard_index) = pid_hashmap.get(&w_pid) {
                     connection
                         .run_command(format!(
@@ -96,8 +97,8 @@ async fn process_window_event(
                         ))
                         .await?;
                     info!(
-                        "Window {} keyboard layout set to {}",
-                        &window_name, saved_keyboard_index
+                        "Window {} with pid {} keyboard layout set to {}",
+                        &window_name, &w_pid, saved_keyboard_index
                     );
                 } else {
                     pid_hashmap.insert(w_pid, 0);

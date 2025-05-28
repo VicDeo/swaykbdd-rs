@@ -7,5 +7,4 @@ edition = "2024"
 env_logger = "0.11.8"
 futures-lite = "2.6.0"
 log = "0.4.27"
-# swayipc-async = {git = "https://github.com/dydyamotya/swayipc-rs", branch="feature/async_read_write"}
-swayipc-async = "2.0.4"
+swayipc-async = {git = "https://github.com/jaycefayne/swayipc-rs", branch = "master"}

@@ -92,10 +92,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-pidfd-next"
-version = "0.1.0"
+name = "async-pidfd"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d735ceae68fef3fc01e2b54e3f8971db1e5f5f3774bd7ff4a679c96ce2c145c"
+checksum = "958321a23896f573a3f1809437af5816f3bc90dd2d5ffe8b1cd5645f42230c17"
 dependencies = [
  "async-io",
  "libc",
@@ -449,11 +449,10 @@ dependencies = [
 [[package]]
 name = "swayipc-async"
 version = "2.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9928dd773eb37a4253a4b266269be6eb3ed99c4c71d5b700b24dd852bd03cb89"
+source = "git+https://github.com/jaycefayne/swayipc-rs?branch=master#28be6bb1a61abb1a640be2f68e6d6a6bb3d9afe1"
 dependencies = [
  "async-io",
- "async-pidfd-next",
+ "async-pidfd",
  "futures-lite",
  "serde",
  "serde_json",
@@ -463,8 +462,7 @@ dependencies = [
 [[package]]
 name = "swayipc-types"
 version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "551233c60323e87cfb8194c21cc44577ab848d00bb7fa2d324a2c7f52609eaff"
+source = "git+https://github.com/jaycefayne/swayipc-rs?branch=master#28be6bb1a61abb1a640be2f68e6d6a6bb3d9afe1"
 dependencies = [
  "serde",
  "serde_json",

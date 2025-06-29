@@ -1,7 +1,9 @@
 name: Build and Publish Release
 
 on:
-  workflow_dispatch: # manual trigger from GitHub UI
+  push:
+    tags:
+      - 'v*' # Run on tags starting with 'v' (e.g., v1.0.0)
 
 env:
   CARGO_TERM_COLOR: always
@@ -11,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        BUILD_TARGET: [release] # cargo profile
+        BUILD_TARGET: [release]
 
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +49,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.ref_name }}  # Automatically use the tag that triggered the workflow
           files: |
             swaykbdd-rs
         env:
